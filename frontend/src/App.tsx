@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { componentRegistry, createComponent, type ComponentDefinition } from './componentRegistry';
-import type { DashboardComponent, DashboardConfig, Project } from './types';
+import type { ComponentType, DashboardComponent, DashboardConfig, Project } from './types';
 
 const API = 'http://localhost:8080/api/projects';
 const emptyConfig: DashboardConfig = { version: 2, components: [] };
@@ -10,13 +10,16 @@ function normalizeConfig(raw: unknown): DashboardConfig {
   const value = raw as { version?: number; components?: Array<Record<string, unknown>> };
   const components = Array.isArray(value.components) ? value.components.map((item) => {
     const legacyType = String(item.type ?? 'BUTTON');
-    const type = componentRegistry[legacyType] ? legacyType : 'BUTTON';
+    const type = (legacyType in componentRegistry ? legacyType : 'BUTTON') as ComponentType;
+    const savedProperties = item.properties && typeof item.properties === 'object'
+      ? item.properties as Record<string, string | number | boolean>
+      : {};
     return {
       id: String(item.id ?? crypto.randomUUID()),
       type,
       label: String(item.label ?? componentRegistry[type].label),
       actionKey: String(item.actionKey ?? ''),
-      properties: { ...componentRegistry[type].defaults, ...(item.properties ?? {}) }
+      properties: { ...componentRegistry[type].defaults, ...savedProperties }
     } as DashboardComponent;
   }) : [];
   return { version: 2, components };
