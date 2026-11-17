@@ -40,68 +40,56 @@ The designer includes a reusable global library of nine component types:
 
 Each component has a definition in `frontend/src/componentRegistry.ts`, including default properties and its editable property schema. The same registry is shared by all dashboard projects. Components are configured per project and rendered in the live canvas preview.
 
-Designer capabilities:
-- Search the global component library and add components to a dashboard.
-- Select components and edit type-specific properties.
-- Duplicate and remove components.
-- Save/load dashboard JSON through the existing Spring Boot project API.
-- Export a dashboard configuration as JSON.
-- Load legacy Phase 1 configurations; missing component properties are populated with defaults.
-
 ## Phase 3 — Java backend action engine
 
 The backend exposes a server-side allowlisted Java action registry. Dashboard configurations may store an action key, but the browser cannot supply Java class names, method names, source code, or shell commands for execution.
 
 ### Action endpoints
-- `GET /api/actions` — list the registered actions and their input contracts.
+- `GET /api/actions` — list registered actions.
 - `POST /api/actions/{actionKey}/execute` — execute one registered action.
 
-Example request:
+Starter actions: `system.ping`, `dashboard.greeting`, `math.add`, and `text.uppercase`.
+
+Run backend tests with `mvn test` from `backend`.
+
+## Phase 4 — REST API integration
+
+The REST action endpoint accepts a method, URL, safe request headers, optional JSON body, and optional response mappings.
+
 ```http
-POST /api/actions/math.add/execute
+POST /api/rest-actions/execute
 Content-Type: application/json
 
 {
-  "inputs": {
-    "left": 12,
-    "right": 3.5
+  "method": "GET",
+  "url": "https://api.example.com/v1/users/42",
+  "headers": { "Accept": "application/json" },
+  "responseMappings": {
+    "userId": "/id",
+    "userName": "/name"
   }
 }
 ```
 
-Example response:
-```json
-{
-  "actionKey": "math.add",
-  "status": "SUCCESS",
-  "result": 15.5,
-  "executedAt": "2026-11-17T20:00:00Z",
-  "durationMs": 1
-}
-```
+The response includes the upstream HTTP status, response data, mapped values, timestamp, and duration. Response mappings use JSON Pointer paths (for example, `/data/id`).
 
-Registered starter actions:
-- `system.ping` — verifies that the action engine is available.
-- `dashboard.greeting` — returns a greeting; optional input: `name`.
-- `math.add` — adds numeric `left` and `right` inputs.
-- `text.uppercase` — converts the required `text` input to uppercase.
+### REST security controls
+- Set `REST_ALLOWED_HOSTS` to a comma-separated list of exact hostnames controlled by your team. Requests to other hosts are rejected.
+- Only HTTPS URLs on port 443 are accepted; URL credentials and fragments are rejected.
+- Local, private, link-local, and multicast DNS addresses are blocked.
+- Redirects are disabled; request timeout is 10 seconds.
+- Request and response bodies are limited to 1 MB.
+- Configurable headers are limited to `Accept`, `Content-Type`, and `X-Request-Id`.
+- Optional server-side bearer authentication is supplied using `REST_API_BEARER_TOKEN`. Do not send secrets from browser configuration.
+- Supported methods: GET, POST, PUT, PATCH, DELETE.
 
-The registry validates required and unsupported inputs. Unknown action keys return HTTP 404; invalid inputs return HTTP 400. Execution logs record the action key and duration, not input values.
-
-### Test the action engine
-From `backend`:
+Example:
 ```bash
-mvn test
+export REST_ALLOWED_HOSTS="api.example.com"
+export REST_API_BEARER_TOKEN="your-server-side-token"
 ```
 
-Example requests:
-```bash
-curl http://localhost:8080/api/actions
-
-curl -X POST http://localhost:8080/api/actions/math.add/execute \
-  -H "Content-Type: application/json" \
-  -d '{"inputs":{"left":12,"right":3.5}}'
-```
+This endpoint is a controlled integration foundation, not a substitute for authentication and per-user authorization. Do not expose it publicly until authentication, rate limits, audit controls, and per-project permissions are implemented.
 
 ## Existing project API
 - `GET /api/projects`
@@ -110,12 +98,7 @@ curl -X POST http://localhost:8080/api/actions/math.add/execute \
 - `PUT /api/projects/{id}`
 - `DELETE /api/projects/{id}`
 
-Project configuration is stored as JSON in PostgreSQL. Phase 2 does not require a database schema migration.
+Project configuration is stored as JSON in PostgreSQL.
 
 ## Security boundary
-The `actionKey` property is an identifier only. Never execute arbitrary Java class names, method names, source code, or shell commands supplied by the browser. Java actions must be registered in a server-side allowlist. Before enabling external REST actions, add server-side endpoint allowlists, authentication, timeouts, and secret storage.
-
-## Next milestones
-1. Add secure REST API action definitions and response mapping.
-2. Generate React component/configuration files and Java controller/service/DTO templates.
-3. Add authentication, project permissions, audit logs, and import/export validation.
+Never execute arbitrary Java class names, method names, source code, or shell commands supplied by the browser. Java actions must be registered in a server-side allowlist. External REST requests must use exact server-configured host allowlists and server-side secret storage.

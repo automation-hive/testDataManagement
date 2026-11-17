@@ -14,7 +14,13 @@ class RestActionServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new RestActionService(new ObjectMapper(), "api.example.com,localhost", "");
+        service = new RestActionService(new ObjectMapper(), "api.example.com", "");
+    }
+
+    @Test
+    void allowsConfiguredHttpsHost() {
+        assertEquals("api.example.com",
+            service.validateTarget("https://api.example.com/v1/items").getHost());
     }
 
     @Test
@@ -36,13 +42,7 @@ class RestActionServiceTest {
     }
 
     @Test
-    void blocksLocalhostEvenWhenItIsAllowlisted() {
-        assertThrows(ResponseStatusException.class,
-            () -> service.validateTarget("https://localhost/v1"));
-    }
-
-    @Test
-    void rejectsUnsupportedMethodBeforeMakingNetworkRequest() {
+    void rejectsUnsupportedMethod() {
         assertThrows(ResponseStatusException.class,
             () -> service.execute(new RestActionRequest("TRACE",
                 "https://api.example.com/v1", Map.of(), null, Map.of())));

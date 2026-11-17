@@ -16,3 +16,10 @@ spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
+
+dashboardforge:
+  rest:
+    # Comma-separated exact hostnames. Only HTTPS on port 443 is allowed.
+    allowed-hosts: ${REST_ALLOWED_HOSTS:}
+    # Optional server-side bearer token; never send API secrets from the browser.
+    bearer-token: ${REST_API_BEARER_TOKEN:}
