@@ -1,0 +1,5 @@
+com/dashboardforge/project/ProjectController.class
+com/dashboardforge/project/ProjectRepository.class
+com/dashboardforge/DashboardForgeApplication.class
+com/dashboardforge/project/ProjectRequest.class
+com/dashboardforge/project/Project.class

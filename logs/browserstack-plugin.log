@@ -1,0 +1,6 @@
+21:20:29.496 [AWT-EventQueue-0] INFO  c.b.sdk.actions.DisableBrowserStack - Setting disable browserstack run update
+21:20:29.503 [AWT-EventQueue-0] INFO  c.b.sdk.actions.EnableBrowserStack - Setting enable browserstack run update
+21:21:00.533 [ApplicationImpl pooled thread 37] INFO  c.b.s.l.BrowserStackRunExtension - spring boot
+21:21:00.533 [ApplicationImpl pooled thread 37] INFO  com.browserstack.sdk.utils.Helpers - null
+21:25:55.116 [AWT-EventQueue-0] INFO  c.b.sdk.actions.EnableBrowserStack - Setting enable browserstack run update
+21:25:55.124 [AWT-EventQueue-0] INFO  c.b.sdk.actions.DisableBrowserStack - Setting disable browserstack run update
