@@ -3,6 +3,7 @@ import { componentRegistry, createComponent, type ComponentDefinition } from './
 import type { ComponentType, DashboardComponent, DashboardConfig, Project } from './types';
 
 const API = 'http://localhost:8080/api/projects';
+const CODEGEN_API = 'http://localhost:8080/api/code-generation/generate';
 const emptyConfig: DashboardConfig = { version: 2, components: [] };
 
 function normalizeConfig(raw: unknown): DashboardConfig {
@@ -135,6 +136,30 @@ export default function App() {
     setNotice('Dashboard configuration exported.');
   }
 
+  async function generateCode() {
+    setBusy(true);
+    try {
+      const response = await fetch(CODEGEN_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectName, configJson: JSON.stringify(config) })
+      });
+      if (!response.ok) throw new Error('Code generation failed');
+      const archive = await response.blob();
+      const url = URL.createObjectURL(archive);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `${projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'dashboard'}-source.zip`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      setNotice('React and Java source code generated.');
+    } catch {
+      setNotice('Code generation failed. Check the backend and dashboard configuration.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -143,6 +168,7 @@ export default function App() {
         <div className="topbar-actions">
           <button className="button button-quiet" onClick={newProject}>New project</button>
           <button className="button button-quiet" onClick={exportConfig}>Export JSON</button>
+          <button className="button button-quiet" onClick={() => void generateCode()} disabled={busy}>{busy ? 'Generating…' : 'Generate code'}</button>
           <button className="button button-primary" onClick={() => void saveProject()} disabled={busy}>{busy ? 'Saving…' : 'Save project'}</button>
         </div>
       </header>
@@ -205,10 +231,10 @@ export default function App() {
           ) : (
             <div className="inspector-empty"><span className="inspector-empty-icon">⌘</span><strong>Nothing selected</strong><p>Select a component on the canvas to edit its configuration.</p></div>
           )}
-          <div className="inspector-info"><span className="info-icon">i</span><div><strong>Safe by design</strong><p>Action keys are identifiers, not executable code. Server-side allowlists will control backend operations.</p></div></div>
+          <div className="inspector-info"><span className="info-icon">i</span><div><strong>Safe by design</strong><p>Action keys are identifiers only. The backend executes registered actions through its allowlist.</p></div></div>
         </aside>
       </div>
-      <footer className="app-footer"><span>DashboardForge <b>·</b> Phase 2</span><span>Professional dashboard design workspace</span></footer>
+      <footer className="app-footer"><span>DashboardForge <b>·</b> Phase 5</span><span>Professional dashboard design workspace</span></footer>
     </div>
   );
 }
