@@ -1,12 +1,11 @@
-export type ComponentType = 'BUTTON' | 'TEXT_FIELD' | 'CARD' | 'TABLE';
-export type ComponentProps = Record<string, string | boolean>;
+export type ComponentType = 'BUTTON' | 'TEXT_FIELD' | 'DROPDOWN' | 'CHECKBOX' | 'METRIC_CARD' | 'DATA_TABLE' | 'CHART' | 'ALERT' | 'STATUS_BADGE';
 
 export interface DashboardComponent {
   id: string;
   type: ComponentType;
   label: string;
   actionKey: string;
-  props: ComponentProps;
+  properties: Record<string, string | number | boolean>;
 }
 
 export interface DashboardConfig {
