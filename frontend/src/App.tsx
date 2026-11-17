@@ -63,7 +63,7 @@ export default function App() {
     setNotice(`${definition.label} added to the canvas.`);
   }
 
-  function updateProperty(key: string, value: unknown) {
+  function updateProperty(key: string, value: string | number | boolean) {
     if (!selected) return;
     updateComponent(selected.id, (item) => ({ ...item, properties: { ...item.properties, [key]: value } }));
   }
