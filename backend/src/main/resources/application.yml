@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/dashboardforge
-    username: abhisheksharma
-    password: Shiva@9555
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/dashboardforge}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
