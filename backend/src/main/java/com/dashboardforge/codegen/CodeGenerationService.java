@@ -82,7 +82,13 @@ public class CodeGenerationService {
             export const dashboardConfig = %s as const;
             const dashboardTitle = %s;
 
-            type ComponentConfig = (typeof dashboardConfig.components)[number];
+            type ComponentConfig = {
+              id: string;
+              type: string;
+              label: string;
+              actionKey?: string;
+              properties: Record<string, string | number | boolean>;
+            };
 
             function renderComponent(component: ComponentConfig) {
               const props = component.properties;

@@ -91,6 +91,20 @@ export REST_API_BEARER_TOKEN="your-server-side-token"
 
 This endpoint is a controlled integration foundation, not a substitute for authentication and per-user authorization. Do not expose it publicly until authentication, rate limits, audit controls, and per-project permissions are implemented.
 
+## Phase 5 — Source code generation
+
+Use the Generate code button in the designer or call the backend endpoint directly:
+
+- POST /api/code-generation/generate — accepts a project name and dashboard configuration JSON, then returns a ZIP archive.
+
+The archive contains:
+- A React + TypeScript dashboard view with the component configuration embedded.
+- The dashboard configuration as standalone JSON.
+- A Java Spring Boot action-controller and request DTO scaffold that delegates only to the existing allowlisted ActionRegistry.
+- Readme files and generation notes.
+
+The generator validates JSON, limits dashboards to 100 components, and only accepts component types registered by DashboardForge. The generated data table and chart are starting placeholders; connect them to real data sources. Action keys are identifiers and are not automatically executed by generated UI code. Review and test generated source before deploying.
+
 ## Existing project API
 - `GET /api/projects`
 - `GET /api/projects/{id}`
